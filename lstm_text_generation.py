@@ -15,6 +15,23 @@ from json import load
 import re
 from gc import collect
 from datetime import datetime
+import argparse
+
+# ================================================
+# Argument Parser
+# ================================================
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--path", type=str, required=True)
+parser.add_argument("--learning_rate", type=float, default=0.001)
+parser.add_argument("--clipping_value", type=float, default=0.5)
+parser.add_argument("--number_of_layers", type=int, default=3)
+parser.add_argument("--lstm_size", type=int, default=512)
+parser.add_argument("--lstm_bidirectional", type=bool, default=True)
+parser.add_argument("--batch_normalization", type=bool, default=True)
+parser.add_argument("--epochs", type=int, default=100)
+parser.add_argument("--batch_size", type=int, default=128)
+parser = parser.parse_args()
 
 # ================================================
 # Configuration
@@ -24,14 +41,14 @@ max_len              = 40
 step                 = 3
 permitted_characters = ascii_lowercase + " '?!"
 joining_characters   = " | "
-lstm_size            = 512
-number_of_layers     = 3
-learning_rate        = 0.001
-clipping_value       = 0.5
-batch_size           = 128
-epochs               = 100
-bidirectional_lstm   = True
-batch_normalization  = True
+lstm_size            = parser.lstm_size
+number_of_layers     = parser.number_of_layers
+learning_rate        = parser.learning_rate
+clipping_value       = parser.clipping_value
+batch_size           = parser.batch_size
+epochs               = parser.epochs
+bidirectional_lstm   = parser.lstm_bidirectional
+batch_normalization  = parser.batch_normalization
 
 # ================================================
 # ================================================
@@ -52,8 +69,7 @@ class Joke:
         new_string = re.sub(' +', ' ', new_string).strip()
         return new_string
 
-
-path = "/media/khaled/thor/Repositories/openai-jokes-dataset/reddit_jokes.json"
+path = parser.path
 json_jokes = [Joke(x).transform() for x in load(open(path, 'r'))]
 text = joining_characters.join(json_jokes)
 text = text[:int(2.5 * 1e6)]
@@ -74,10 +90,16 @@ next_chars  = []
 
 output('Building the model.')
 
+# ================================================
+# Model configuration
+# ================================================
+
 model = Sequential()
 
+# Input layer
 model.add(BatchNormalization(input_shape=(max_len, len(chars))))
 
+# N-1 layers, stacked LSTMs (optionally bidirectional)
 for i in range(number_of_layers - 1):
     if bidirectional_lstm:
         model.add(Bidirectional(LSTM(lstm_size, return_sequences=True)))
@@ -87,21 +109,28 @@ for i in range(number_of_layers - 1):
     if batch_normalization:
         model.add(BatchNormalization())
 
+# 1 final LSTM layer, does not return sequences
 if bidirectional_lstm:
     model.add(Bidirectional(LSTM(lstm_size, return_sequences=False)))
 else:
     model.add(LSTM(lstm_size, return_sequences=False))
 
+# Optionally, one final batch norm. layer
 if batch_normalization:
     model.add(BatchNormalization())
 
+# Output layer
 model.add(Dense(len(chars)))
 model.add(Activation('softmax'))
 
+# Optimizer with clipping value to prevent gradient explosion
 optimizer = Adam(lr=learning_rate, clipvalue=clipping_value)
 
 model.compile(loss='categorical_crossentropy', optimizer=optimizer)
 model.summary()
+
+# ================================================
+# ================================================
 
 for i in range(0, len(text) - max_len, step):
     sentences.append(text[i: i + max_len])
