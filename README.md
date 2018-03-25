@@ -14,7 +14,7 @@ export PATH_TO_JOKES=$PWD
 ```
 git clone https://github.com/KhaledSharif/openai-jokes.git
 cd openai-jokes
-python3 lstm_text_generation.py --path=$PATH_TO_JOKES --batch_size=512 --epochs=1000
+python3 lstm_text_generation.py --path=$PATH_TO_JOKES/reddit_jokes.json --batch_size=512 --epochs=1000
 ```
 
 #### Training arguments
