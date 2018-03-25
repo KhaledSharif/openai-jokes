@@ -1,6 +1,47 @@
 # OpenAI Jokes
 ### Training a character-level language model on a corpus of jokes.
 
+#### How to obtain the training dataset
+
+```
+git clone https://github.com/taivop/joke-dataset.git
+cd joke-dataset
+export PATH_TO_JOKES=$PWD
+```
+
+#### How to train
+
+```
+git clone https://github.com/KhaledSharif/openai-jokes.git
+cd openai-jokes
+python3 lstm_text_generation.py --path=$PATH_TO_JOKES --batch_size=512 --epochs=1000
+```
+
+#### Training arguments
+
+```
+python3 lstm_text_generation.py --help
+```
+
+```
+  --path PATH           Path to JSON file containing jokes
+  --learning_rate LEARNING_RATE
+                        Learning rate as a float
+  --clipping_value CLIPPING_VALUE
+                        Clipping value of the gradient as a float
+  --number_of_layers NUMBER_OF_LAYERS
+                        Number of layers in the LSTM, integer
+  --lstm_size LSTM_SIZE
+                        Number of neurons in each individual LSTM, integer
+  --lstm_bidirectional LSTM_BIDIRECTIONAL
+                        LSTM direction (uni or bi), boolean
+  --batch_normalization BATCH_NORMALIZATION
+                        Batch normalization (enabled or disabled), boolean
+  --epochs EPOCHS       Number of training epochs, integer
+  --batch_size BATCH_SIZE
+                        Training batch size, integer
+```
+
 #### Output after 100 epochs
 
 ```

@@ -22,15 +22,15 @@ import argparse
 # ================================================
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--path", type=str, required=True)
-parser.add_argument("--learning_rate", type=float, default=0.001)
-parser.add_argument("--clipping_value", type=float, default=0.5)
-parser.add_argument("--number_of_layers", type=int, default=3)
-parser.add_argument("--lstm_size", type=int, default=512)
-parser.add_argument("--lstm_bidirectional", type=bool, default=True)
-parser.add_argument("--batch_normalization", type=bool, default=True)
-parser.add_argument("--epochs", type=int, default=100)
-parser.add_argument("--batch_size", type=int, default=128)
+parser.add_argument("--path", type=str, required=True, help="Path to JSON file containing jokes")
+parser.add_argument("--learning_rate", type=float, default=0.001, help="Learning rate as a float")
+parser.add_argument("--clipping_value", type=float, default=0.5, help="Clipping value of the gradient as a float")
+parser.add_argument("--number_of_layers", type=int, default=3, help="Number of layers in the LSTM, integer")
+parser.add_argument("--lstm_size", type=int, default=512, help="Number of neurons in each individual LSTM, integer")
+parser.add_argument("--lstm_bidirectional", type=bool, default=True, help="LSTM direction (uni or bi), boolean")
+parser.add_argument("--batch_normalization", type=bool, default=True, help="Batch normalization (enabled or disabled), boolean")
+parser.add_argument("--epochs", type=int, default=100, help="Number of training epochs, integer")
+parser.add_argument("--batch_size", type=int, default=128, help="Training batch size, integer")
 parser = parser.parse_args()
 
 # ================================================
@@ -160,14 +160,14 @@ def sample(preds, temperature=1.0):
 
 def on_epoch_end(epoch, logs):
     print("\n")
-    output('----- Generating text after epoch: {}'.format(epoch))
+    output('Generating text after epoch: {}'.format(epoch))
     start_index = random.randint(0, len(text) - max_len - 1)
     for diversity in [0.2, 0.5, 1.0, 1.2]:
-        output('----- Diversity:', diversity)
+        output('Diversity: {}'.format(diversity))
         generated = ''
         sentence = text[start_index: start_index + max_len]
         generated += sentence
-        output('----- Generating with seed: "{}"'.format(sentence))
+        output('Generating with seed: "{}"'.format(sentence))
         sys.stdout.write(generated)
         for i in range(400):
             x_pred = np.zeros((1, max_len, len(chars)))
